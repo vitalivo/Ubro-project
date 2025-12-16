@@ -1,14 +1,26 @@
-from pydantic import Field
+from typing import Optional
+from pydantic import BaseModel
 from datetime import datetime
-from . import BaseSchema
 
 
-class TransactionSchemaCreate(BaseSchema):
-    user_id: int = Field(..., gt=0)
-    is_withdraw: bool = Field(True)
-    amount: float = Field(..., gt=0)
+class TransactionCreate(BaseModel):
+    user_id: int
+    is_withdraw: bool
+    amount: float
 
 
-class TransactionSchema(TransactionSchemaCreate):
-    id: int = Field(..., gt=0)
-    created_at: datetime = Field(None)
+class TransactionUpdate(BaseModel):
+    user_id: Optional[int] = None
+    is_withdraw: Optional[bool] = None
+    amount: Optional[float] = None
+
+
+class TransactionSchema(BaseModel):
+    id: int
+    user_id: int
+    is_withdraw: bool
+    amount: float
+    created_at: datetime | None = None
+
+    class Config:
+        from_attributes = True

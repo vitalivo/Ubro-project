@@ -2,7 +2,6 @@ from sqlalchemy import exc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import update, insert, select, text
 from sqlalchemy.exc import SQLAlchemyError
-from app.backend.utils.exceptions import handle_pg_raised_exception
 from app.crud.base import CrudBase
 from app.models import User
 from app.schemas import UserSchema, UserSchemaCreate
@@ -17,7 +16,8 @@ class CrudUser(CrudBase):
         try: 
             result = await self.execute_get_one(session, stmt)
         except SQLAlchemyError as e:
-            handle_pg_raised_exception(e)
+            logger.exception("DB error in update_user_balance")
+            raise
         
         return BalanceUpdateResponse.model_validate_json(result) if result else None
 
