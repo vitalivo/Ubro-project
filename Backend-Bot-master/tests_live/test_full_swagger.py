@@ -309,8 +309,7 @@ def test_driver_locations_create_invalid_profile(client):
         "latitude": 50.45,
         "longitude": 30.52
     })
-    # API возвращает 500 (IntegrityError) вместо 422
-    assert response.status_code in (422, 500)
+    assert response.status_code == 422
 
 
 def test_driver_locations_get_by_id(client, test_driver_location):
@@ -365,8 +364,7 @@ def test_driver_documents_create_invalid_profile(client):
         "doc_type": "license",
         "file_url": "https://example.com/doc.pdf"
     })
-    # API возвращает 500 (IntegrityError) вместо 422
-    assert response.status_code in (422, 500)
+    assert response.status_code == 422
 
 
 def test_driver_documents_get_by_id(client, test_driver_document):
@@ -473,8 +471,7 @@ def test_phone_verifications_create_invalid_user(client):
         "phone": "+380999999999",
         "code": "123456"
     })
-    # API возвращает 500 (IntegrityError) вместо 422
-    assert response.status_code in (422, 500)
+    assert response.status_code == 422
 
 
 def test_phone_verifications_get_by_id(client, test_phone_verification):
@@ -529,8 +526,7 @@ def test_transactions_create_invalid_user(client):
         "is_withdraw": False,
         "amount": 100.0
     })
-    # API возвращает 500 (IntegrityError) вместо 422
-    assert response.status_code in (422, 500)
+    assert response.status_code == 422
 
 
 def test_transactions_get_by_id(client, test_transaction):
