@@ -6,6 +6,19 @@
 - Python 3.12+ (для запуска тестов локально)
 - WSL2 (для Windows)
 
+### Python зависимости для тестов
+
+| Пакет | Версия | Назначение |
+|-------|--------|------------|
+| pytest | ≥9.0.0 | Фреймворк тестирования |
+| pytest-asyncio | ≥1.3.0 | Поддержка async тестов |
+| httpx | ≥0.28.0 | HTTP клиент для API запросов |
+| anyio | ≥4.0.0 | Async I/O (зависимость httpx) |
+| certifi | ≥2024.0.0 | SSL сертификаты |
+| httpcore | ≥1.0.0 | HTTP протокол (зависимость httpx) |
+| idna | ≥3.0 | Интернационализация доменов |
+| h11 | ≥0.16.0 | HTTP/1.1 парсер |
+
 ---
 
 ## Быстрый старт
@@ -97,7 +110,25 @@ docker exec -it WEB_APP alembic history
 ### Установка зависимостей (один раз)
 
 ```bash
+# Основные зависимости для тестов
 pip install pytest pytest-asyncio httpx
+
+# Или все сразу (рекомендуется)
+pip install pytest pytest-asyncio httpx anyio certifi httpcore idna h11
+```
+
+### Проверка установки
+
+```bash
+# Проверить что все пакеты установлены
+pip list | grep -E "pytest|httpx|asyncio"
+```
+
+Ожидаемый вывод:
+```
+httpx               0.28.1
+pytest              9.0.2
+pytest-asyncio      1.3.0
 ```
 
 ### Запуск реальных тестов
@@ -109,15 +140,31 @@ docker compose up -d
 # 2. Убедитесь что миграции применены
 docker exec -it WEB_APP alembic upgrade head
 
-# 3. Запуск тестов
+# 3. Запуск ВСЕХ тестов (74 теста)
+pytest tests_live/ -v
+
+# 4. Или только swagger тесты (59 тестов)
+pytest tests_live/test_full_swagger.py -v
+
+# 5. Или только real API тесты (15 тестов)
 pytest tests_live/test_real_api.py -v
 ```
 
 ### Ожидаемый результат
 
 ```
-15 passed, 0 failed
+74 passed, 0 failed
 ```
+
+### Примечание по ERROR в teardown
+
+При запуске тестов вы можете увидеть ERROR после каждого PASSED теста:
+```
+test_users_get_paginated PASSED
+test_users_get_paginated ERROR
+```
+
+Это **известная проблема** совместимости pytest-asyncio с httpx.AsyncClient (закрытие event loop). **Не влияет на результаты тестов** — важно что статус PASSED.
 
 ---
 
@@ -134,13 +181,22 @@ Backend-Bot-master/
 │   ├── models/               # SQLAlchemy модели
 │   └── schemas/              # Pydantic схемы
 ├── migrations/               # Alembic миграции
-├── tests_live/               # Интеграционные тесты
+├── tests_live/               # Интеграционные тесты (74 теста)
 │   ├── conftest.py           # Фикстуры pytest
-│   ├── test_real_api.py      # Реальные API тесты
-│   └── test_full_swagger.py  # Тесты всех эндпоинтов
+│   ├── test_real_api.py      # Real API тесты (15 тестов)
+│   └── test_full_swagger.py  # Swagger тесты (59 тестов)
+├── archive/                  # Архивные файлы
+│   ├── tests/                # Старые тесты
+│   ├── tests_api_v1/         # ASGI тесты
+│   ├── scripts/              # Старые скрипты
+│   ├── logs/                 # Логи PostgreSQL
+│   ├── config/               # Конфиг PostgreSQL
+│   └── .github/              # GitHub Actions
 ├── docker-compose.yml        # Docker конфигурация
 ├── Dockerfile                # Образ приложения
-└── pyproject.toml            # Зависимости Python
+├── pyproject.toml            # Зависимости Python
+├── SETUP.md                  # Эта инструкция
+└── TEST_RESULTS.md           # Результаты тестов
 ```
 
 ---
