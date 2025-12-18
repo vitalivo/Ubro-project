@@ -3,6 +3,7 @@ from app.services.pdf_generator import PDFGenerator, pdf_generator
 from app.services.driver_tracker import DriverTracker, driver_tracker, DriverStatus, RideClass
 from app.services.matching_engine import MatchingEngine, matching_engine, RideRequest, DriverMatch
 from app.services.order_dispatcher import OrderDispatcher, order_dispatcher
+from app.services.chat_service import ChatService, chat_service, MessageType, ModerationResult
 
 __all__ = [
     # WebSocket
@@ -24,4 +25,9 @@ __all__ = [
     # Dispatching
     "OrderDispatcher",
     "order_dispatcher",
+    # Chat
+    "ChatService",
+    "chat_service",
+    "MessageType",
+    "ModerationResult",
 ]

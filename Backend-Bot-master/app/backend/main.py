@@ -20,6 +20,7 @@ from app.backend.routers.transaction import transaction_router
 from app.backend.routers.websocket import websocket_router
 from app.backend.routers.documents import documents_router
 from app.backend.routers.matching import matching_router
+from app.backend.routers.chat import chat_router
 # Optional debug router is disabled for smoke run
 
 app = FastAPI()
@@ -49,6 +50,7 @@ app.include_router(transaction_router, tags=['Transactions'], prefix=API_PREFIX)
 app.include_router(websocket_router, tags=['WebSocket'], prefix=API_PREFIX)
 app.include_router(documents_router, tags=['Documents'], prefix=API_PREFIX)
 app.include_router(matching_router, tags=['Matching'], prefix=API_PREFIX)
+app.include_router(chat_router, tags=['Chat'], prefix=API_PREFIX)
 # app.include_router(pg_errs_router, tags=["Debug"])
 
 
