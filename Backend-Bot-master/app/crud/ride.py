@@ -1,5 +1,6 @@
 from typing import Optional, Any
 from datetime import datetime
+from decimal import Decimal
 import json
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert, update, text
@@ -7,6 +8,14 @@ from app.crud.base import CrudBase
 from app.models.ride import Ride
 from app.models.ride_status_history import RideStatusHistory
 from app.schemas.ride import RideSchema, RideCreate, RideUpdate, RideStatusChangeRequest
+
+
+def _convert_decimals(d: dict) -> dict:
+    """Convert Decimal values to float for JSON serialization"""
+    for k, v in d.items():
+        if isinstance(v, Decimal):
+            d[k] = float(v)
+    return d
 
 
 STATUSES = {
@@ -167,16 +176,18 @@ class RideCrud(CrudBase[Ride, RideSchema]):
         # Преобразуем Row -> модель -> схема
         # Проще повторно прочитать ORM-объект по id, но это второй запрос.
         # Поэтому собираем словарь вручную из возврата CTE upd.
+        # Порядок колонок должен точно соответствовать порядку в таблице rides!
         col_names = [
-            "id", "client_id", "driver_profile_id", "status", "status_reason", "scheduled_at",
-            "started_at", "completed_at", "canceled_at", "cancellation_reason",
+            "id", "client_id", "driver_profile_id", "status", "status_reason",
             "pickup_address", "pickup_lat", "pickup_lng",
             "dropoff_address", "dropoff_lat", "dropoff_lng",
+            "scheduled_at", "started_at", "completed_at", "canceled_at", "cancellation_reason",
             "expected_fare", "expected_fare_snapshot", "driver_fare", "actual_fare",
             "distance_meters", "duration_seconds", "transaction_id", "commission_id",
             "is_anomaly", "anomaly_reason", "ride_metadata", "created_at", "updated_at",
         ]
         ride_dict = {k: v for k, v in zip(col_names, row)}
+        ride_dict = _convert_decimals(ride_dict)
         return RideSchema.model_validate(ride_dict)
 
     async def accept_ride_idempotent(
@@ -281,17 +292,19 @@ class RideCrud(CrudBase[Ride, RideSchema]):
                 return None, "already_taken"
 
         # Успешно обновлено
+        # Порядок колонок должен точно соответствовать порядку в таблице rides!
         col_names = [
-            "id", "client_id", "driver_profile_id", "status", "status_reason", "scheduled_at",
-            "started_at", "completed_at", "canceled_at", "cancellation_reason",
+            "id", "client_id", "driver_profile_id", "status", "status_reason",
             "pickup_address", "pickup_lat", "pickup_lng",
             "dropoff_address", "dropoff_lat", "dropoff_lng",
+            "scheduled_at", "started_at", "completed_at", "canceled_at", "cancellation_reason",
             "expected_fare", "expected_fare_snapshot", "driver_fare", "actual_fare",
             "distance_meters", "duration_seconds", "transaction_id", "commission_id",
             "is_anomaly", "anomaly_reason", "ride_metadata", "created_at", "updated_at",
         ]
         # Отрезаем последние 2 поля (prev_status, prev_driver_id)
         ride_dict = {k: v for k, v in zip(col_names, row[:-2])}
+        ride_dict = _convert_decimals(ride_dict)
         return RideSchema.model_validate(ride_dict), "accepted"
 
     async def get_pending_rides(
