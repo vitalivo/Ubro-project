@@ -1,8 +1,3 @@
-"""
-Documents Router
-API для генерации и скачивания PDF документов
-"""
-
 from fastapi import APIRouter, HTTPException, Request, Query
 from fastapi.responses import Response
 from typing import Optional

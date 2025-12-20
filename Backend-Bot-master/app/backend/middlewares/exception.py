@@ -1,6 +1,7 @@
+
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import HTTPException
+from fastapi.exceptions import HTTPException, RequestValidationError
 from typing import Union, Dict, Any
 
 from pydantic import ValidationError
@@ -19,6 +20,12 @@ class ErrorHandlingMiddleware:
             return JSONResponse(
                 status_code=exc.status_code,
                 content={"detail": exc.detail}
+            )
+        except RequestValidationError as exc:
+            logger.error(f"Request validation error occurred: {exc}")
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": exc.errors()}
             )
         except ValidationError as exc:
             logger.error(f"Validation error occurred: {exc}")
